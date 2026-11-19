@@ -7,29 +7,40 @@ Private email inbox for testing applications and services that you own or are au
 - Captures real messages sent by your test application over SMTP.
 - Stores messages persistently in a local database.
 - Provides a browser dashboard to inspect message content, headers, HTML and attachments.
-- Supports live dashboard updates when new test messages arrive.
-- Keeps the dashboard and SMTP listener bound to localhost by default.
+- Provides live dashboard updates when new test messages arrive.
+- Supports secure HTTPS access from a phone or computer through Caddy.
+- Protects the dashboard and API with a username and password.
 
 This is a private QA mail catcher. It is not a public disposable-email provider and does not create accounts at third-party platforms or generate artificial engagement.
+
+## Why this uses Mailpit rather than Mail.tm
+
+Mail.tm is a temporary-email API. Its published terms prohibit reselling a wrapper around its API and proxying or mirroring the API under another domain; it also requires attribution. ORIGIN MAIL AI is being built as a private QA inbox for systems you control, so this starter uses Mailpit to capture test messages sent by your own applications instead. See [Mail.tm's API documentation](https://docs.mail.tm/) and its published usage policy.
 
 ## Requirements
 
 - A Linux server or computer with Docker Engine and the Docker Compose plugin.
+- A domain name whose DNS points to that server.
+- Ports 80 and 443 reachable from the internet for automatic HTTPS.
 - A browser.
-- An HTTPS reverse proxy if you need to access the dashboard remotely.
+
+## Configure
+
+1. Copy `.env.example` to `.env`.
+2. Set `DOMAIN` to your real domain or subdomain, such as `mail.yourdomain.com`.
+3. Replace `CHANGE_THIS_TO_A_LONG_RANDOM_PASSWORD` with a unique, long password.
+4. Make sure the domain's DNS A/AAAA record points to the server.
+5. Allow inbound TCP ports 80 and 443 through the server firewall.
 
 ## Start
 
-1. Copy `.env.example` to `.env`.
-2. Replace `CHANGE_THIS_TO_A_LONG_RANDOM_PASSWORD` with a unique, long password.
-3. Start the service:
+```sh
+docker compose up -d
+```
 
-   ```sh
-   docker compose up -d
-   ```
+Open `https://your-domain.example` on your phone or computer and sign in using the username and password from `MP_UI_AUTH`.
 
-4. Open `http://127.0.0.1:8025` on the server, or access it through a properly secured HTTPS reverse proxy.
-5. Sign in using the username and password from `MP_UI_AUTH`.
+Caddy obtains and renews HTTPS certificates automatically when DNS and network access are configured correctly.
 
 ## Configure your test application
 
@@ -44,13 +55,9 @@ For an application running in another Docker container, attach both services to 
 
 Send only test messages from systems you control or are authorized to test. Do not expose the unauthenticated SMTP port to the public internet.
 
-## Remote dashboard access
-
-The dashboard is bound to `127.0.0.1:8025` intentionally. To access it from your phone or another device, configure a reverse proxy with HTTPS and keep authentication enabled. Do not change the binding to `0.0.0.0` on an internet-facing server without a deliberate network and access-control setup.
-
 ## Real-time updates and API
 
-Mailpit includes a REST API under `/api/v1/` and a WebSocket event endpoint at `/api/events`. The dashboard uses live updates for newly captured messages. The WebSocket event format is documented by Mailpit but is not part of its stable official API, so integrations should tolerate changes.
+Mailpit includes a REST API under `/api/v1/` and a WebSocket event endpoint at `/api/events`. Its dashboard updates live when new test messages arrive. The WebSocket event format is not part of its stable official API, so custom integrations should tolerate changes.
 
 ## Important limitation
 
