@@ -12,8 +12,29 @@ services:
       TZ: ${TZ:-Asia/Manila}
     volumes:
       - ./data:/data
+    expose:
+      - "8025"
     ports:
-      # Keep the dashboard and SMTP listener private on the host.
-      # Put a HTTPS reverse proxy in front of port 8025 for remote access.
-      - "127.0.0.1:8025:8025"
+      # SMTP is available only on the host for local QA applications.
       - "127.0.0.1:1025:1025"
+
+  caddy:
+    image: caddy:2
+    container_name: origin-mail-ai-proxy
+    restart: unless-stopped
+    depends_on:
+      - mailpit
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env before starting}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
