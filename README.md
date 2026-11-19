@@ -24,19 +24,18 @@ Mail.tm is a temporary-email API. Its published terms prohibit reselling a wrapp
 - Ports 80 and 443 reachable from the internet for automatic HTTPS.
 - A browser.
 
-## Configure
+## Configure and start
 
-1. Copy `.env.example` to `.env`.
-2. Set `DOMAIN` to your real domain or subdomain, such as `mail.yourdomain.com`.
-3. Replace `CHANGE_THIS_TO_A_LONG_RANDOM_PASSWORD` with a unique, long password.
-4. Make sure the domain's DNS A/AAAA record points to the server.
-5. Allow inbound TCP ports 80 and 443 through the server firewall.
+1. Edit `.env.example` and set `DOMAIN` to your real domain or subdomain, such as `mail.yourdomain.com`.
+2. Make sure the domain's DNS A/AAAA record points to the server.
+3. Allow inbound TCP ports 80 and 443 through the server firewall.
+4. Run the setup helper:
 
-## Start
+   ```sh
+   bash setup.sh
+   ```
 
-```sh
-docker compose up -d
-```
+The helper creates `.env`, generates a strong dashboard password, validates the Compose configuration, and starts the services. Keep `.env` private. If you prefer manual setup, copy `.env.example` to `.env`, set a strong unique value for `MP_UI_AUTH`, then run `docker compose up -d`.
 
 Open `https://your-domain.example` on your phone or computer and sign in using the username and password from `MP_UI_AUTH`.
 
